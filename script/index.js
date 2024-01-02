@@ -250,7 +250,7 @@ function handleFilterSelection (type, selectedItem) {
       btn.id = `myButton-${index}`
       btn.addEventListener('click', e => {
         addedVarients.push({ ...filteredItem, count: 0 })
-        handleVariableBtn(e, index)
+        handleVariableBtn(e, index, filteredItem.product)
       })
       td.append(btn)
       tbRow.append(td)
@@ -265,9 +265,10 @@ function handleFilterSelection (type, selectedItem) {
  * @function handleVariableBtn
  * @param {event} e
  * @param {number} index
+ * @param {string} product
  * @description shows variant table and shows the added item
  */
-function handleVariableBtn (e, index) {
+function handleVariableBtn (e, index, product) {
   addedVarientTable.classList.remove('hidden')
   selectedVarText.classList.add('!hidden')
   populateTableContent()
@@ -291,10 +292,10 @@ function handleVariableBtn (e, index) {
   newDiv.appendChild(addBtn)
   button.parentNode.replaceChild(newDiv, button)
   addBtn.addEventListener('click', () =>
-    handleVarientChange('add', index, button, newDiv)
+    handleVarientChange('add', index, button, newDiv, product)
   )
   minusBtn.addEventListener('click', () =>
-    handleVarientChange('minus', index, button, newDiv)
+    handleVarientChange('minus', index, button, newDiv, product)
   )
 }
 
@@ -305,23 +306,28 @@ function handleVariableBtn (e, index) {
  * @param {*} button
  * @param {*} newDiv
  */
-function handleVarientChange (type, index, button, newDiv) {
+function handleVarientChange (type, index, button, newDiv, product) {
   const counter = document.getElementById(`counter-${index}`)
   const currentValue = Number(counter.innerText)
   if (type === 'add' && currentValue < 10) {
     counter.innerText = currentValue + 5
-    addedVarients = addedVarients.map((v, i) =>
-      index === i ? { ...v, count: currentValue + 5 } : v
-    )
-    document.getElementById(`count-${index}`).innerText = currentValue + 5
+    addedVarients = addedVarients.map((v, i) => {
+      if (product === v.product) {
+        document.getElementById(`count-${i}`).innerText = currentValue + 5
+        return { ...v, count: currentValue + 5 }
+      }
+      return v
+    })
   } else if (type === 'minus') {
     if (currentValue > 0) {
       counter.innerText = currentValue - 5
-      addedVarients = addedVarients.map((v, i) =>
-        index === i ? { ...v, count: currentValue - 5 } : v
-      )
-
-      document.getElementById(`count-${index}`).innerText = currentValue - 5
+      addedVarients = addedVarients.map((v, i) => {
+        if (product === v.product) {
+          document.getElementById(`count-${i}`).innerText = currentValue - 5
+          return { ...v, count: currentValue - 5 }
+        }
+        return v
+      })
     } else {
       newDiv.parentNode.replaceChild(button, newDiv)
       addedVarients = addedVarients.filter((_v, i) => i !== index)
