@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"
+    ></script>
+    <style>
+      ::-webkit-scrollbar {
+        background: -webkit-linear-gradient(0, #ecedeb 50%, white 100%);
+        width: 4px !important;
+        height: 4px !important;
+      }
+      ::-webkit-scrollbar-thumb {
+        background-color: #cddae7;
+        width: 1px !important;
+        border-radius: 30px !important;
+      }
+    </style>
+
+    <title>Home</title>
+  </head>
+  <body class="h-screen w-screen overflow-hidden text-white bg-black">
+    <section
+      id="overlay"
+      class="fixed top-0 right-0 h-full w-full z-50 bg-[#00000091] p-5 hidden"
+    >
+      <div
+        class="flex flex-col bg-gray-50 w-auto md:w-[600px] m-auto top-[100px] relative border-grey border-2 rounded-lg"
+      >
+        <div class="py-5 px-6 border-b-2">
+          <h3 class="text-2xl text-gray-600" id="modal-title"></h3>
+        </div>
+        <div id="modal-body" class="py-5 px-6">
+          <div
+            id="menu-container"
+            class="border border-gray-200 rounded-md shadow-md p-3 flex flex-col gap-4 bg-white"
+          >
+            <div class="grid grid-cols-3 gap-5">
+              <div class="text-black flex flex-col gap-2 relative">
+                <span class="text-xs"> Region of Testing </span>
+                <button
+                  id="rot"
+                  onclick="handleDropDownSelection('rot-list')"
+                  class="text-black rounded-md bg-white border-grey border px-3 py-2 !focus-visible:border-blue-200 text-sm text-left"
+                >
+                  Select
+                </button>
+                <ul
+                  id="rot-list"
+                  class="bg-white border border-gray-300 py-3 rounded-md absolute w-full top-[65px] max-h-[150px] hidden overflow-auto"
+                ></ul>
+              </div>
+              <div class="text-black flex flex-col gap-2 relative">
+                <span class="text-xs"> eSim </span>
+                <button
+                  id="sim"
+                  onclick="handleDropDownSelection('sim-list')"
+                  class="text-black rounded-md bg-white border-grey border px-3 py-2 !focus-visible:border-blue-200 text-sm text-left"
+                >
+                  Select
+                </button>
+                <ul
+                  id="sim-list"
+                  class="bg-white border border-gray-300 py-3 rounded-md absolute w-full top-[65px] max-h-[150px] hidden overflow-auto"
+                ></ul>
+              </div>
+              <div class="text-black flex flex-col gap-2 relative">
+                <span class="text-xs"> Form Factors </span>
+                <button
+                  id="ff"
+                  onclick="handleDropDownSelection('ff-list')"
+                  class="text-black rounded-md bg-white border-grey border px-3 py-2 !focus-visible:border-blue-200 text-sm text-left"
+                >
+                  Select
+                </button>
+                <ul
+                  id="ff-list"
+                  class="bg-white border border-gray-300 py-3 rounded-md absolute w-full top-[65px] max-h-[150px] hidden overflow-auto"
+                ></ul>
+              </div>
+            </div>
+            <button
+              type="reset"
+              onclick="handleReset()"
+              class="bg-red-500 border border-gray-700 rounded py-1 px-3 text-xs w-fit self-end"
+            >
+              Reset
+            </button>
+          </div>
+          <div id="filtered-products" class="my-6 overflow-auto max-h-[250px]">
+            <table class="w-full">
+              <thead
+                class="text-gray-500 font-medium text-sm border-b-2 border-gray-500"
+              >
+                <tr class="text-left">
+                  <th class="py-2">Name</th>
+                  <th class="py-2">Region</th>
+                  <th class="py-2">eSIM</th>
+                  <th class="py-2">Form Factor</th>
+                  <th class="py-2 w-[123px]">Qty</th>
+                </tr>
+              </thead>
+              <tbody id="table-body" class="text-gray-400 font-normal text-sm">
+                <tr id="no-data-text">
+                  <td
+                    class="text-gray-500 font-medium text-sm text-center"
+                    colspan="5"
+                  >
+                    No Variants
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="my-6 overflow-auto max-h-[250px] flex-col gap-4">
+            <table id="added-varients" class="w-full hidden">
+              <thead
+                class="text-gray-500 font-medium text-sm border-b-2 border-gray-500"
+              >
+                <tr class="text-left">
+                  <th class="py-2">#</th>
+                  <th class="py-2">Name</th>
+                  <th class="py-2">Region</th>
+                  <th class="py-2">eSIM</th>
+                  <th class="py-2">Form Factor</th>
+                  <th class="py-2">Qty</th>
+                  <th class="py-2">Action</th>
+                </tr>
+              </thead>
+              <tbody
+                id="varient-list-body"
+                class="text-gray-400 font-normal text-sm"
+              ></tbody>
+            </table>
+            <div
+              id="selected-varient-text"
+              class="text-gray-500 font-medium text-sm text-center"
+            >
+              No Selected Varients
+            </div>
+            <div class="flex justify-end items-center gap-2 my-4">
+              <button
+                type="button"
+                onclick="handleCancelBtn()"
+                class="bg-white border border-gray-600 rounded text-black text-xs px-3 py-2 font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                onclick="handleAddToCart()"
+                class="bg-blue-700 rounded text-white text-xs px-3 py-2 font-medium"
+              >
+                Add to Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section
+      id="off-canvas"
+      class="fixed top-0 right-0 h-full w-full z-50 bg-[#00000091] hidden text-black"
+    >
+      <div class="bg-white w-1/3 ml-auto flex flex-col px-4">
+        <div class="flex justify-between p-5 border-gray-400 border-b-2">
+          <h3>PRODUCT</h3>
+          <span onclick="handleCartOpening('close')" class="cursor-pointer"
+            >X</span
+          >
+        </div>
+        <div id="product-infoBox" class="border-black py-5"></div>
+        <div class="mt-auto p-5 flex border-t-2 border-gray-600">
+          <button
+            type="submit"
+            class="bg-blue-700 rounded-full text-white font-medium px-4 py-3 m-auto w-80"
+          >
+            Checkout
+          </button>
+        </div>
+      </div>
+    </section>
+    <section class="bg-inherit p-8 h-full w-full overflow-auto rou">
+      <div class="max-w-[1200px] mx-auto">
+        <div class="text-center">
+          <h1 class="text-4xl">Store Heading</h1>
+        </div>
+        <div class="mt-10">
+          <div class="py-3 text-center">
+            <h3 class="text-gray-500 text-2xl">Smart Modules</h3>
+          </div>
+          <ul
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+            id="productList"
+          ></ul>
+        </div>
+        <button
+          type="button"
+          onclick="handleCartOpening('open')"
+          class="bg-blue-800 rounded-full h-10 w-10 fixed bottom-20 right-20 flex justify-center items-center"
+        >
+          <div
+            id="cart-count"
+            class="rounded-full bg-red-800 absolute bottom-7 w-5 h-5 text-xs hidden"
+          >
+            <span class="m-auto" id="count"></span>
+          </div>
+          <img src="./assets/cart.svg" />
+        </button>
+      </div>
+    </section>
+  </body>
+  <script src="./script/home.js"></script>
+</html>
