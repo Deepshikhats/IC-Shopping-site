@@ -389,6 +389,13 @@ function handleAddToCart () {
 function handleCancelBtn () {
   popup.classList.remove('!block')
   handleReset()
+  selectedCategory = []
+  list.forEach(v => {
+    const ul = document.getElementById(v)
+    while (ul.firstChild) {
+      ul.removeChild(ul.firstChild)
+    }
+  })
 }
 
 /**
@@ -464,7 +471,6 @@ const handleCartOpening = action => {
  * @description
  */
 const handleReset = () => {
-  selectedCategory = []
   addedVarients = []
   rotButton.innerText = 'Select'
   ffButton.innerText = 'Select'
@@ -475,12 +481,6 @@ const handleReset = () => {
   while (variantTableBodyNode.firstChild) {
     variantTableBodyNode.removeChild(variantTableBodyNode.firstChild)
   }
-  list.forEach(v => {
-    const ul = document.getElementById(v)
-    while (ul.firstChild) {
-      ul.removeChild(ul.firstChild)
-    }
-  })
 
   selectedVarText.classList.remove('!hidden')
   addedVarientTable.classList.add('hidden')
